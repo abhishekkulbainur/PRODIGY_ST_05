@@ -1,0 +1,53 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from time import sleep
+
+# Setup the WebDriver (Chrome in this case)
+driver = webdriver.Chrome(executable_path='/path/to/chromedriver')  # Replace with your ChromeDriver path
+
+# Open the e-commerce website
+driver.get("http://automationpractice.com/index.php")
+
+# 1. Add an item to the cart
+driver.find_element(By.XPATH, "//a[@title='Faded Short Sleeve T-shirts']").click()  # Navigate to a product page
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "add_to_cart"))).click()  # Click on 'Add to Cart'
+
+# Wait for the confirmation popup and click on the 'Proceed to checkout' button
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//span[contains(text(), 'Proceed to checkout')]"))).click()
+
+# 2. Login (if required) - Example assuming login is needed
+# Navigate to the login page (you may need to adjust this for the specific e-commerce site you're testing)
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "email"))).send_keys("testuser@test.com")  # Enter email
+driver.find_element(By.ID, "passwd").send_keys("testpassword")  # Enter password
+driver.find_element(By.ID, "SubmitLogin").click()  # Click login
+
+# 3. Proceed to checkout
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//span[contains(text(),'Proceed to checkout')]"))).click()  # Click checkout button
+
+# 4. Fill out checkout forms
+# Fill in delivery address information (modify these inputs based on the form's IDs and names)
+driver.find_element(By.NAME, "address1").send_keys("123 Test St.")  # Enter address
+driver.find_element(By.NAME, "city").send_keys("Test City")  # Enter city
+driver.find_element(By.NAME, "postcode").send_keys("12345")  # Enter postal code
+driver.find_element(By.NAME, "phone_mobile").send_keys("1234567890")  # Enter mobile number
+
+# Select the shipping option (assuming it's the default one)
+driver.find_element(By.NAME, "processAddress").click()  # Continue to next page
+
+# 5. Choose payment method (for example, 'Pay by bank wire')
+WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "bankwire"))).click()  # Click 'Pay by bank wire'
+driver.find_element(By.XPATH, "//span[contains(text(),'I confirm my order')]").click()  # Confirm the order
+
+# 6. Verify success message
+success_message = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(text(),'Your order on My Store is complete.')]")))
+assert success_message.text == "Your order on My Store is complete."
+
+print("Checkout process automated successfully!")
+
+# Sleep for 3 seconds and close the browser
+sleep(3)
+driver.quit()
